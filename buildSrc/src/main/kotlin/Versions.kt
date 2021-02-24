@@ -1,26 +1,29 @@
 object Versions {
 
     object Kotlin {
-        const val serializationRuntime = "1.0.0"
-        const val kotlin = "1.4.10"
+        const val serializationRuntime = "1.1.0"
+        const val kotlin = "1.4.30"
         const val serialization = kotlin
-        const val serializationJson ="1.0.0"
-        const val ktor = "1.4.1"
+        const val serializationJson ="1.1.0"
+        const val ktor = "1.5.1"
 
 
-        const val coroutines = "1.3.9"
-        const val kodein = "7.0.0"
+        const val coroutines = "1.4.2"
+        const val kodein = "7.3.1"
 
         const val kotlinHTML = "0.7.1"
+
+        const val klock = "1.10.3"
+
     }
 
     object Js {
         object Frontend {
-            const val kotlinReact = "17.0.0-pre.129-kotlin-1.4.10"
-            const val kotlinReactDom = "17.0.0-pre.129-kotlin-1.4.10"
-            const val kotlinReactRouting = "5.2.0-pre.129-kotlin-1.4.10"
-            const val kotlinStyled = "5.2.0-pre.129-kotlin-1.4.10"
-            const val kotlinCss = "1.0.0-pre.129-kotlin-1.4.10"
+            const val kotlinReact = "17.0.1-pre.146-kotlin-1.4.30"
+            const val kotlinReactDom = "17.0.1-pre.146-kotlin-1.4.30"
+            const val kotlinReactRouting = "5.2.0-pre.146-kotlin-1.4.30"
+            const val kotlinStyled = "5.2.1-pre.146-kotlin-1.4.30"
+            const val kotlinCss = "1.0.0-pre.146-kotlin-1.4.30"
 
             object Npm {
                 const val react = "17.0.0"

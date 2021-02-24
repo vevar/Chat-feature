@@ -54,6 +54,10 @@ object Deps {
         val kotlinSerializationJson = MultiplatformDeps(
             common = "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlin.serializationJson}"
         )
+
+        val klock = MultiplatformDeps(
+            common = "com.soywiz.korlibs.klock:klock:${Versions.Kotlin.klock}"
+        )
     }
 
     object Js {

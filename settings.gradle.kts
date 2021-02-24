@@ -31,6 +31,15 @@ object Modules {
             const val errorHandling = "${root}:error"
             const val api = "${root}:api"
             const val env = "${root}:env"
+            const val domain = "${root}:domain"
+
+            val list = listOf(
+                errorHandling,
+                api,
+                env,
+                domain
+            )
+
         }
 
         object Jvm {
@@ -57,10 +66,7 @@ object Modules {
 }
 
 Modules.Feature.list.forEach { include(it) }
-
-include(Modules.Tool.Mpp.api)
-include(Modules.Tool.Mpp.errorHandling)
-include(Modules.Tool.Mpp.env)
+Modules.Tool.Mpp.list.forEach { include(it) }
 
 include(Modules.Tool.Jvm.webServer)
 include(Modules.Tool.Jvm.dataBaseManager)

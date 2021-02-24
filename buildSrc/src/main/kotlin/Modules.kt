@@ -8,34 +8,20 @@ object Modules {
 
         const val root = ":feature"
 
-        val auth = "$root:auth"
     }
 
     object Data {
         private const val root = ":sample:data"
 
-        const val auth = "$root:auth-data"
 
-        val list = arrayOf(auth)
+        val list = arrayOf<String>()
     }
 
 
     object Microservice {
         const val root = ":sample:microservice"
 
-        const val auth = "$root:auth"
 
-        object Auth {
-            const val root = "${Microservice.root}:auth"
-            const val grpc = "$root:grpc"
-            const val webClient = "$root:web-client"
-        }
-
-        val modules = arrayOf(
-            Auth.root,
-            Auth.grpc,
-            Auth.webClient
-        )
     }
 
     object Tool {
@@ -47,6 +33,14 @@ object Modules {
             const val errorHandling = "${root}:error"
             const val api = "${root}:api"
             const val env = "${root}:env"
+            const val domain = "${root}:domain"
+
+            val list = listOf(
+                errorHandling,
+                api,
+                env,
+                domain
+            )
 
         }
 
