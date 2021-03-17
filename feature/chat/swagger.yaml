@@ -1,0 +1,308 @@
+openapi: 3.0.0
+info:
+  description: "Chat service"
+  version: "1.0.0"
+  title: "Chat service"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "alxminyaev@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+  - url: "http://localhost/chat"
+  - url: "http://5.130.14.37:8080/chat"
+
+tags:
+  - name: "Chat"
+    description: "Chat"
+  - name: "Message"
+    description: "Message"
+
+paths:
+  /api/v1/chat:
+    get:
+      tags:
+        - "Chat"
+      summary: "Get list of chats for user (Получить список чатов пользователя)"
+      description: ""
+      operationId: "getListChats"
+      parameters:
+        - in: query
+          required: true
+          name: offset
+          schema:
+            type: integer
+            format: int64
+          description: "The number of items to skip before starting to collect the result set"
+        - in: query
+          required: true
+          name: limit
+          schema:
+            type: integer
+            format: int32
+          description: "The numbers of items to return"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatsList"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/chat/create:
+    post:
+      tags:
+        - "Chat"
+      summary: "Create chat (Создание чата)"
+      description: ""
+      operationId: "postNewChat"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostNewChatRequest"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityLongCreatedResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+
+  /api/v1/chat/{chat_id}/messages:
+    get:
+      tags:
+        - "Message"
+      summary: "Get list of last messages from chat"
+      description: ""
+      operationId: "getMessagesByChatId"
+      parameters:
+        - in: path
+          name: chat_id
+          description: "ID of chat"
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          required: true
+          name: offset
+          schema:
+            type: integer
+            format: int64
+          description: "The number of items to skip before starting to collect the result set"
+        - in: query
+          required: true
+          name: limit
+          schema:
+            type: integer
+            format: int32
+          description: "The numbers of items to return"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagesListFromChat'
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/chat/{chatId}/user/message:
+    post:
+      tags:
+        - "Message"
+      summary: "Create message in chat (chat_id) (Создать сообщение в чате по id)"
+      description: ""
+      operationId: "postMessageInChat"
+      parameters:
+        - in: path
+          name: chatId
+          description: "ID of chat"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityLongCreatedResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+
+components:
+  schemas:
+    PostNewChatRequest:
+      type: object
+      required:
+        - users
+        - chatType
+      properties:
+        users:
+          type: array
+          items:
+            type: integer
+            format: int64
+        name:
+          type: string
+        chatType:
+          type: integer
+          format: int32
+    ChatsList:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatResponse"
+
+    ChatResponse:
+      type: object
+      required:
+        - id
+        - name
+        - users
+        - userInfo
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        users:
+          type: array
+          items:
+            type: integer
+            format: int64
+        userInfo:
+          $ref: "#/components/schemas/UserInfo"
+        lastMessage:
+          $ref: '#/components/schemas/MessageResponse'
+
+    UserInfo:
+      type: object
+      required:
+        - sizeOfUnreadMessages
+      properties:
+        sizeOfUnreadMessages:
+          type: integer
+          format: int64
+
+    MessagesListFromChat:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageResponse'
+
+    MessageResponse:
+      type: object
+      required:
+        - id
+        - dateTime
+        - sender
+        - receiver
+      properties:
+        id:
+          type: integer
+          format: int64
+        text:
+          type: string
+        dateTime:
+          type: "string"
+          format: "date-time"
+          description: "UTC"
+        sender:
+          type: integer
+          format: int64
+          description: "id of sender"
+        receiver:
+          type: integer
+          format: int64
+          description: "id of receiver"
+    CreateMessageRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        field:
+          type: "string"
+        message:
+          type: "string"
+    EntityLongCreatedResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: "integer"
+          format: "int64"

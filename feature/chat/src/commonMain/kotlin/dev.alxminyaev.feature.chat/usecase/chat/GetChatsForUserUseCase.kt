@@ -10,6 +10,6 @@ class GetChatsForUserUseCase(
 ) {
 
     suspend fun invoke(user: SideOfChat.User, dataLimit: DataLimit): List<Chat> {
-        return chatRepository.findBySide(user, dataLimit)
+        return chatRepository.findByUser(user, dataLimit)
     }
 }

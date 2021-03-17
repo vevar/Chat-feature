@@ -6,7 +6,12 @@ import dev.alxminyaev.feature.chat.model.SideOfChat
 
 interface ChatRepository {
 
+    suspend fun save(chat: Chat): Long
+
     suspend fun findById(id: Long): Chat?
 
-    suspend fun findBySide(sideOfChat: SideOfChat, dataLimit: DataLimit): List<Chat>
+    suspend fun findByUser(sideOfChat: SideOfChat.User, dataLimit: DataLimit): List<Chat>
+
+    suspend fun findByUsersAndOneType(firstUser: Long, secondUser: Long): List<Chat>
+
 }

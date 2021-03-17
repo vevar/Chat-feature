@@ -3,8 +3,10 @@ package dev.alxminyaev.feature.chat.usecase.message
 import com.alxminyaev.tool.error.exceptions.NotFoundException
 import com.alxminyaev.tool.error.exceptions.ValidationDataException
 import com.soywiz.klock.DateTime
+import com.soywiz.klock.DateTimeTz
 import dev.alxminyaev.feature.chat.model.Message
 import dev.alxminyaev.feature.chat.model.SideOfChat
+import dev.alxminyaev.feature.chat.model.user.User
 import dev.alxminyaev.feature.chat.repository.ChatRepository
 import dev.alxminyaev.feature.chat.repository.MessageRepository
 import dev.alxminyaev.feature.chat.repository.UserRepository
@@ -15,7 +17,7 @@ class SendMessageInChatUseCase(
     private val userRepository: UserRepository
 ) {
 
-    suspend fun invoke(sender: SideOfChat, receiver: SideOfChat, text: String? = null) {
+    suspend fun invoke(creator: User, sender: SideOfChat, receiver: SideOfChat, text: String? = null): Long {
         if (text.isNullOrBlank()) {
             throw ValidationDataException(message = "Message can't be empty")
         }
@@ -23,25 +25,25 @@ class SendMessageInChatUseCase(
         when (sender) {
             is SideOfChat.User -> userRepository.findById(sender.id)
                 ?: throw NotFoundException("Пользователь с id=${sender.id} не найден")
-            is SideOfChat.Common -> chatRepository.findById(sender.id)
+            is SideOfChat.Chat -> chatRepository.findById(sender.id)
                 ?: throw  NotFoundException("Чат с id=${sender.id} не найден")
         }
 
         when (receiver) {
-            is SideOfChat.User -> userRepository.findById(sender.id)
-                ?: throw NotFoundException("Пользователь с id=${receiver.id} не найден")
-            is SideOfChat.Common -> chatRepository.findById(sender.id)
+            is SideOfChat.User -> throw NotFoundException("Пользователь с id=${receiver.id} не найден")
+            is SideOfChat.Chat -> chatRepository.findById(receiver.id)
                 ?: throw  NotFoundException("Чат с id=${receiver.id} не найден")
         }
 
         val message = Message(
             id = 0,
             text = text,
-            dateTime = DateTime.now().utc,
+            dateTime = DateTime.nowLocal(),
+            creator = creator,
             sender = sender,
             receiver = receiver
         )
 
-        messageRepository.save(message)
+        return messageRepository.save(message)
     }
 }
