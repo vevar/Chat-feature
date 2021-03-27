@@ -11,6 +11,22 @@ class CreateNewChatUseCase(
     private val userRepository: UserRepository
 ) {
 
+    suspend fun createGroupChat(name: String): Long {
+        if (name.isBlank()) {
+            throw ValidationDataException(field = "name", message = "Name of chat must be set")
+        }
+        return chatRepository.save(
+            Chat(
+                id = 0,
+                users = listOf(),
+                name = name,
+                type = Chat.Type.GROUP,
+                userInfo = Chat.UserInfo(0),
+                lastMessage = null
+            )
+        )
+    }
+
     suspend fun invoke(creatorId: Long, usersId: List<Long>, chatType: Chat.Type, name: String? = null): Long {
         if (usersId.isEmpty()) {
             throw ValidationDataException(field = "users", message = "List of users must be set")
