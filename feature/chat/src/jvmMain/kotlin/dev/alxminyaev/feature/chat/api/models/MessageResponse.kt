@@ -23,7 +23,7 @@ package dev.alxminyaev.feature.chat.api.models
 data class MessageResponse (
     val id: kotlin.Long,
     /* UTC */
-    val dateTime: java.time.LocalDateTime,
+    val dateTime: String,
     /* id of sender */
     val sender: kotlin.Long,
     /* id of receiver */

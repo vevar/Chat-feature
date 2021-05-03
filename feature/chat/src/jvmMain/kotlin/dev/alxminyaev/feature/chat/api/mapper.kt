@@ -17,7 +17,7 @@ fun Message.toMessageResponse(): MessageResponse {
     return MessageResponse(
         id = id,
         text = text,
-        dateTime = LocalDateTime.parse(dateTime.toString(dateFormat)),
+        dateTime = dateTime.toString(dateFormat),
         sender = sender.id,
         receiver = receiver.id
     )
