@@ -9,7 +9,8 @@ class Message(
     val dateTime: DateTimeTz,
     val creator: User,
     val sender: SideOfChat,
-    val receiver: SideOfChat
+    val receiver: SideOfChat,
+    val files: List<FileInfo> = listOf(),
 )
 
 

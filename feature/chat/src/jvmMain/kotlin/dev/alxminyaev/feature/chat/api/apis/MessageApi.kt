@@ -27,12 +27,21 @@ import dev.alxminyaev.tool.webServer.utils.User
 import dev.alxminyaev.tool.webServer.utils.user
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.locations.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.jvm.javaio.*
+import io.ktor.utils.io.streams.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
+import java.io.InputStream
+import java.lang.IllegalStateException
+import java.nio.channels.ReadableByteChannel
 
 @KtorExperimentalLocationsAPI
 fun Route.MessageApi() {
@@ -55,19 +64,63 @@ fun Route.MessageApi() {
     authenticate {
         route("/api/v1/chat/{chat_id}/user/message") {
             post {
-                val obj = call.receive<CreateMessageRequest>()
                 val user = call.principal<User>() ?: throw UnauthorizedException()
                 val useCase by di().instance<SendMessageInChatUseCase>()
-                val eventId = useCase.invoke(
-                    creator = dev.alxminyaev.feature.chat.model.user.User(user.id),
-                    sender = SideOfChat.User(user.id),
-                    receiver = SideOfChat.Chat(
-                        call.parameters["chat_id"]?.toLong()
-                            ?: throw ValidationDataException(message = "chat_id must be set")
-                    ),
-                    text = obj.text
+                val chat = SideOfChat.Chat(
+                    call.parameters["chat_id"]?.toLong()
+                        ?: throw ValidationDataException(message = "chat_id must be set")
                 )
-                call.respond(EntityLongCreatedResponse(eventId))
+                val contentType = call.request.contentType()
+                val messageId = when {
+                    contentType.match(ContentType.MultiPart.FormData) -> {
+                        val multiPartData = call.receiveMultipart()
+                        var text: String? = null
+                        val files = linkedMapOf<String, ByteReadChannel>()
+
+                        multiPartData.forEachPart { part ->
+                            when (part) {
+                                is PartData.FormItem -> {
+                                    if (part.name == "text" && text != null) {
+                                        throw ValidationDataException()
+                                    }
+                                    text = part.value
+                                }
+                                is PartData.FileItem -> {
+                                    if (part.name == "files") {
+                                        val fileName = part.originalFileName ?: throw ValidationDataException()
+                                        val inputStream = part.streamProvider().toByteReadChannel()
+                                        files[fileName] = inputStream
+                                    }
+                                }
+                                is PartData.BinaryItem -> {
+                                    throw IllegalStateException()
+                                }
+                                else -> {
+
+                                }
+                            }
+//                            part.dispose()
+                        }
+                        useCase.invoke(
+                            creator = dev.alxminyaev.feature.chat.model.user.User(user.id),
+                            sender = SideOfChat.User(user.id),
+                            receiver = chat,
+                            text = text,
+                            files = files
+                        )
+
+                    }
+                    else -> {
+                        val obj = call.receive<CreateMessageRequest>()
+                        useCase.invoke(
+                            creator = dev.alxminyaev.feature.chat.model.user.User(user.id),
+                            sender = SideOfChat.User(user.id),
+                            receiver = chat,
+                            text = obj.text
+                        )
+                    }
+                }
+                call.respond(EntityLongCreatedResponse(messageId))
             }
         }
     }

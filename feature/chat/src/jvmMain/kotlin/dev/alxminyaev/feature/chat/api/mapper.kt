@@ -3,13 +3,20 @@ package dev.alxminyaev.feature.chat.api
 import com.soywiz.klock.DateFormat
 import dev.alxminyaev.feature.chat.api.models.*
 import dev.alxminyaev.feature.chat.model.Chat
+import dev.alxminyaev.feature.chat.model.FileInfo
 import dev.alxminyaev.feature.chat.model.Message
+import java.io.File
 import java.time.LocalDateTime
 import java.util.logging.Level
 import java.util.logging.Logger
 
 const val DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
+fun FileInfo.toFileResponse(): FileResponse = FileResponse(
+    id = id,
+    name = File(path).name,
+    path = path
+)
 
 fun Message.toMessageResponse(): MessageResponse {
     val dateFormat = DateFormat.invoke(DATETIME_FORMAT)
@@ -19,7 +26,8 @@ fun Message.toMessageResponse(): MessageResponse {
         text = text,
         dateTime = dateTime.toString(dateFormat),
         sender = sender.id,
-        receiver = receiver.id
+        receiver = receiver.id,
+        files = files.map { it.toFileResponse() }.toTypedArray()
     )
 }
 

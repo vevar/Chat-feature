@@ -15,22 +15,9 @@ import dev.alxminyaev.feature.chat.api.models.FileResponse
 
 /**
  * 
- * @param id 
- * @param dateTime UTC
- * @param sender id of sender
- * @param receiver id of receiver
- * @param text 
  * @param files 
  */
-data class MessageResponse (
-    val id: kotlin.Long,
-    /* UTC */
-    val dateTime: String,
-    /* id of sender */
-    val sender: kotlin.Long,
-    /* id of receiver */
-    val receiver: kotlin.Long,
-    val text: kotlin.String? = null,
-    val files: kotlin.Array<FileResponse>? = null
+data class FileListResponse (
+    val files: kotlin.Array<FileResponse>
 ) 
 
