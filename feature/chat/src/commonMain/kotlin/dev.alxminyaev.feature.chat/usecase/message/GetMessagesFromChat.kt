@@ -14,9 +14,9 @@ class GetMessagesFromChat(
 ) {
 
     suspend fun invoke(forUser: User, chatId: Long, dataLimit: DataLimit): List<Message> {
-        if (chatRepository.findById(chatId)?.users?.contains(User(forUser.id)) != true) {
-            throw PermissionException()
-        }
+//        if (chatRepository.findById(chatId)?.users?.contains(User(forUser.id)) != true) {
+//            throw PermissionException()
+//        }
         return messageRepository.findByChatAndUser(chatId = chatId, dataLimit = dataLimit)
     }
 }
