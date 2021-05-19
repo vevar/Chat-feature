@@ -11,15 +11,17 @@
  */
 package dev.alxminyaev.feature.chat.api.apis
 
+import com.alxminyaev.tool.error.exceptions.ValidationDataException
 import com.google.gson.Gson
 import dev.alxminyaev.feature.chat.api.models.EntityLongCreatedResponse
 import dev.alxminyaev.feature.chat.api.models.PostNewChatRequest
+import dev.alxminyaev.feature.chat.api.toChatDetailResponse
 import dev.alxminyaev.feature.chat.api.toChatsListResponse
 import dev.alxminyaev.feature.chat.model.Chat
 import dev.alxminyaev.feature.chat.model.DataLimit
 import dev.alxminyaev.feature.chat.model.SideOfChat
-import dev.alxminyaev.feature.chat.model.user.User
 import dev.alxminyaev.feature.chat.usecase.chat.CreateNewChatUseCase
+import dev.alxminyaev.feature.chat.usecase.chat.GetChatByIdUseCase
 import dev.alxminyaev.feature.chat.usecase.chat.GetChatsForUserUseCase
 import dev.alxminyaev.tool.webServer.utils.user
 import io.ktor.application.*
@@ -38,16 +40,27 @@ fun Route.ChatApi() {
     val empty = mutableMapOf<String, Any?>()
 
     authenticate {
-        get("/api/v1/chat") {
+        route("/api/v1/chat") {
+            get {
 
-            val useCase by di().instance<GetChatsForUserUseCase>()
-            val objects = useCase.invoke(
-                user = SideOfChat.User(call.user.id),
-                dataLimit = DataLimit(call.parameters["offset"]!!.toLong(), call.parameters["limit"]!!.toInt())
-            )
+                val useCase by di().instance<GetChatsForUserUseCase>()
+                val objects = useCase.invoke(
+                    user = SideOfChat.User(call.user.id),
+                    dataLimit = DataLimit(call.parameters["offset"]!!.toLong(), call.parameters["limit"]!!.toInt())
+                )
 
-            call.respond(objects.toChatsListResponse())
+                call.respond(objects.toChatsListResponse())
+            }
+
+            get("/{chatId}") {
+                val useCase by di().instance<GetChatByIdUseCase>()
+                val obj =
+                    useCase.invoke(id = call.parameters["chatId"]?.toLongOrNull() ?: throw ValidationDataException())
+
+                call.respond(obj.toChatDetailResponse())
+            }
         }
+
 
     }
 

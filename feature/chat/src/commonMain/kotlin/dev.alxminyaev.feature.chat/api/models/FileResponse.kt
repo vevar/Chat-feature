@@ -14,11 +14,12 @@ package dev.alxminyaev.feature.chat.api.models
 
 /**
  * 
- * @param text 
- * @param files 
+ * @param id 
+ * @param path 
  */
-data class CreateMessageWithAttachmentRequest (
-    val text: kotlin.String,
-    val files: kotlin.Array<java.io.File>? = null
+data class FileResponse (
+    val id: kotlin.Long,
+    val name: String,
+    val path: kotlin.String
 ) 
 

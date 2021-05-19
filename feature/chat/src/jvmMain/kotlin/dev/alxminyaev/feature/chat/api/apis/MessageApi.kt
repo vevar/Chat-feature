@@ -39,9 +39,7 @@ import io.ktor.utils.io.jvm.javaio.*
 import io.ktor.utils.io.streams.*
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
-import java.io.InputStream
 import java.lang.IllegalStateException
-import java.nio.channels.ReadableByteChannel
 
 @KtorExperimentalLocationsAPI
 fun Route.MessageApi() {
@@ -52,7 +50,7 @@ fun Route.MessageApi() {
         get<Paths.getMessagesByChatId> { param: Paths.getMessagesByChatId ->
             val useCase by di().instance<GetMessagesFromChat>()
             val messages = useCase.invoke(
-                forUser = dev.alxminyaev.feature.chat.model.user.User(call.user.id),
+                forUserId = call.user.id,
                 chatId = param.chatId,
                 dataLimit = DataLimit(param.offset, param.limit)
             )
@@ -102,7 +100,7 @@ fun Route.MessageApi() {
 //                            part.dispose()
                         }
                         useCase.invoke(
-                            creator = dev.alxminyaev.feature.chat.model.user.User(user.id),
+                            creatorId = user.id,
                             sender = SideOfChat.User(user.id),
                             receiver = chat,
                             text = text,
@@ -113,7 +111,7 @@ fun Route.MessageApi() {
                     else -> {
                         val obj = call.receive<CreateMessageRequest>()
                         useCase.invoke(
-                            creator = dev.alxminyaev.feature.chat.model.user.User(user.id),
+                            creatorId = user.id,
                             sender = SideOfChat.User(user.id),
                             receiver = chat,
                             text = obj.text

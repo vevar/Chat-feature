@@ -5,6 +5,7 @@ import dev.alxminyaev.feature.chat.api.models.*
 import dev.alxminyaev.feature.chat.model.Chat
 import dev.alxminyaev.feature.chat.model.FileInfo
 import dev.alxminyaev.feature.chat.model.Message
+import dev.alxminyaev.feature.chat.model.user.toApi
 import java.io.File
 import java.time.LocalDateTime
 import java.util.logging.Level
@@ -48,6 +49,24 @@ fun Chat.toChatResponse(): ChatResponse {
         id = id,
         name = name,
         users = users.map { it.id }.toTypedArray(),
+        userInfo = UserInfo(
+            sizeOfUnreadMessages = userInfo.sizeOfUnreadMessages
+        ),
+        lastMessage = lastMessage?.toMessageResponse()
+    )
+}
+
+fun Chat.toChatDetailResponse(): ChatDetailResponse {
+    val name = if (name == null) {
+        Logger.getGlobal().log(Level.WARNING, "Incorrect value of field name")
+        "Name (Error)"
+    } else {
+        name
+    }
+    return ChatDetailResponse(
+        id = id,
+        name = name,
+        users = users.map { it.toApi() }.toTypedArray(),
         userInfo = UserInfo(
             sizeOfUnreadMessages = userInfo.sizeOfUnreadMessages
         ),

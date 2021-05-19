@@ -325,7 +325,6 @@ components:
         - id
         - name
         - users
-        - userInfo
       properties:
         id:
           type: integer
@@ -336,8 +335,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserResponse'
-        userInfo:
-          $ref: "#/components/schemas/UserInfo"
         lastMessage:
           $ref: '#/components/schemas/MessageResponse'
 

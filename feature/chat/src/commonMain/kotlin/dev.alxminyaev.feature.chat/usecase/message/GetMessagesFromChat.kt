@@ -13,7 +13,7 @@ class GetMessagesFromChat(
     private val chatRepository: ChatRepository
 ) {
 
-    suspend fun invoke(forUser: User, chatId: Long, dataLimit: DataLimit): List<Message> {
+    suspend fun invoke(forUserId: Long, chatId: Long, dataLimit: DataLimit): List<Message> {
 //        if (chatRepository.findById(chatId)?.users?.contains(User(forUser.id)) != true) {
 //            throw PermissionException()
 //        }

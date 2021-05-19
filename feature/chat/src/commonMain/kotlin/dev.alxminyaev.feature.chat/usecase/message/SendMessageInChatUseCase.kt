@@ -7,10 +7,12 @@ import dev.alxminyaev.feature.chat.model.Message
 import dev.alxminyaev.feature.chat.model.SideOfChat
 import dev.alxminyaev.feature.chat.model.user.User
 import dev.alxminyaev.feature.chat.repository.ChatRepository
-import dev.alxminyaev.feature.chat.repository.FileRepository
 import dev.alxminyaev.feature.chat.repository.MessageRepository
 import dev.alxminyaev.feature.chat.repository.UserRepository
 import io.ktor.utils.io.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 
 class SendMessageInChatUseCase(
     private val messageRepository: MessageRepository,
@@ -19,40 +21,51 @@ class SendMessageInChatUseCase(
 ) {
 
     suspend fun invoke(
-        creator: User,
+        creatorId: Long,
         sender: SideOfChat,
         receiver: SideOfChat,
         text: String? = null,
         files: Map<String, ByteReadChannel>? = null
     ): Long {
-        if (text.isNullOrBlank() && (files == null || files.isEmpty())) {
-            throw ValidationDataException(message = "Message can't be empty")
+        return withContext(Dispatchers.Default) {
+            if (text.isNullOrBlank() && (files == null || files.isEmpty())) {
+                throw ValidationDataException(message = "Message can't be empty")
+            }
+
+            val creator =
+                async { userRepository.findById(creatorId) ?: throw ValidationDataException("Создатель не найден") }
+
+            val senderCheckJob = async {
+                when (sender) {
+                    is SideOfChat.User -> userRepository.findById(sender.id)
+                        ?: throw NotFoundException("Пользователь с id=${sender.id} не найден")
+                    is SideOfChat.Chat -> chatRepository.findById(sender.id)
+                        ?: throw  NotFoundException("Чат с id=${sender.id} не найден")
+                }
+            }
+
+            val receiverCheckJob = async {
+                when (receiver) {
+                    is SideOfChat.User -> throw NotFoundException("Пользователь с id=${receiver.id} не найден")
+                    is SideOfChat.Chat -> chatRepository.findById(receiver.id)
+                        ?: throw  NotFoundException("Чат с id=${receiver.id} не найден")
+                }
+            }
+
+            senderCheckJob.await()
+            receiverCheckJob.await()
+
+            val message = Message(
+                id = 0,
+                text = text,
+                dateTime = DateTime.nowLocal(),
+                creator = creator.await(),
+                sender = sender,
+                receiver = receiver
+            )
+
+            messageRepository.save(message, files)
         }
-
-        when (sender) {
-            is SideOfChat.User -> userRepository.findById(sender.id)
-                ?: throw NotFoundException("Пользователь с id=${sender.id} не найден")
-            is SideOfChat.Chat -> chatRepository.findById(sender.id)
-                ?: throw  NotFoundException("Чат с id=${sender.id} не найден")
-        }
-
-        when (receiver) {
-            is SideOfChat.User -> throw NotFoundException("Пользователь с id=${receiver.id} не найден")
-            is SideOfChat.Chat -> chatRepository.findById(receiver.id)
-                ?: throw  NotFoundException("Чат с id=${receiver.id} не найден")
-        }
-
-
-        val message = Message(
-            id = 0,
-            text = text,
-            dateTime = DateTime.nowLocal(),
-            creator = creator,
-            sender = sender,
-            receiver = receiver
-        )
-
-        return messageRepository.save(message, files)
     }
 
 
